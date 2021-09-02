@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+    demo-student-php-fpm:
+        image: cytseng/demo-clut-clpa-php-fpm
+        hostname: demo-student-php-fpm
+        container_name: demo-student-php-fpm
+        depends_on:
+            - demo-student-mysql
+        volumes:
+            - ./localtime:/etc/localtime:ro
+            - ./course:/usr/share/nginx/html
+            - ./www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ./99-local.ini:/usr/local/etc/php/99-local.ini
+
+    demo-student-nginx:
+        image: cytseng/demo-clut-clpa-nginx-alpine
+        hostname: demo-student-nginx
+        container_name: demo-student-nginx
+        volumes:
+            - ./default.conf:/etc/nginx/conf.d/default.conf
+            - ./nginx.conf:/etc/nginx/nginx.conf:ro
+        volumes_from:
+            - demo-student-php-fpm
+        depends_on:
+            - demo-student-php-fpm
+        ports:
+            - "80:80"
+
+    demo-student-mysql:
+        image: percona:ps-5.7
+        hostname: demo-student-mysql
+        container_name: demo-student-mysql
+        restart: always
+        volumes:
+           - ./mysqldb:/var/lib/mysql
+        environment:
+           MYSQL_ROOT_PASSWORD: wAhrhNEcHm7T55c
+
+
+    ftpd_server:
+        image: stilliard/pure-ftpd
+        container_name: pure-ftpd
+        ports:
+            - "21:21"
+            - "30000-30009:30000-30009"
+        depends_on:
+            - demo-student-nginx
+        volumes:
+            - ./course:/home/username
+            - ./passwd:/etc/pure-ftpd/passwd
+        environment:
+            PUBLICHOST: 10.251.1.250
+            FTP_USER_NAME: student
+            FTP_USER_PASS: clutclpaftp
+            FTP_USER_HOME: /home/username
+            FTP_USER_UID: 8888
+            FTP_USER_GID: 8888
