@@ -1,17 +1,27 @@
 #!/bin/sh
+rm -f /tmp/docker.log
+touch /tmp/docker.log
+
 NIC=`ifconfig -s | grep enp | awk '{print $1}'`
 IP=`ifconfig $NIC | grep 'inet ' | awk '{print $2}'`
 
-sed -i -e "s;is: ..*;is: $IP;" /etc/issue
+while [ -z $IP ]
+do
+    sleep 1
+    IP=`ifconfig $NIC | grep 'inet ' | awk '{print $2}'`
+done
+
+echo "IP: $IP" >> /tmp/docker.log
+
+sed -i -e "s;is:.*;is: $IP;" /etc/issue
 
 cd /srv/demo-clut-clpa/
 
-sed -i -e "s;PUBLICHOST: ..*;PUBLICHOST: $IP;" docker-compose.yml
+sed -i -e "s;PUBLICHOST:.*;PUBLICHOST: $IP;" docker-compose.yml
 
 docker-compose down
 docker-compose up -d
 
-touch /tmp/docker.log
 date >> /tmp/docker.log
 
 if [ $? -eq 0 ]; then
@@ -21,4 +31,6 @@ else
 fi
 
 docker ps -a >> /tmp/docker.log
+
+systemctl restart getty@tty1
 
