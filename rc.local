@@ -1,0 +1,24 @@
+#!/bin/sh
+NIC=`ifconfig -s | grep enp | awk '{print $1}'`
+IP=`ifconfig $NIC | grep 'inet ' | awk '{print $2}'`
+
+sed -i -e "s;is: ..*;is: $IP;" /etc/issue
+
+cd /srv/demo-clut-clpa/
+
+sed -i -e "s;PUBLICHOST: ..*;PUBLICHOST: $IP;" docker-compose.yml
+
+docker-compose down
+docker-compose up -d
+
+touch /tmp/docker.log
+date >> /tmp/docker.log
+
+if [ $? -eq 0 ]; then
+    echo 'docker start successfully' >> /tmp/docker.log
+else
+    echo 'docker start failly' >> /tmp/docker.log
+fi
+
+docker ps -a >> /tmp/docker.log
+
