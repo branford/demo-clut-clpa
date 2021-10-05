@@ -26,6 +26,8 @@ echo "IP: $IP" >> /tmp/docker.log
 
 sed -i -e "s;is:.*;is: $IP;" /etc/issue
 
+systemctl restart getty@tty1
+
 cd /srv/demo-clut-clpa/
 
 sed -i -e "s;PUBLICHOST:.*;PUBLICHOST: $IP;" docker-compose.yml
@@ -42,6 +44,4 @@ else
 fi
 
 docker ps -a >> /tmp/docker.log
-
-systemctl restart getty@tty1
 
