@@ -29,6 +29,7 @@ services:
       restart: always
       volumes:
         - /etc/localtime:/etc/localtime:ro
+        - ./demo-sql:/var/lib/mysql
       environment:
          MYSQL_ROOT_PASSWORD: password
  
