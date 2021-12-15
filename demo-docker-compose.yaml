@@ -1,0 +1,34 @@
+version: '3.9'
+ 
+services:
+    demo-wp:
+      # container apache uid:gid = 33:33
+      # shift host uid:gid = 200033:200033
+      image: wordpress:latest
+      hostname: demo-wp
+      container_name: demo-wp
+      ports:
+        - "8001:80"
+      restart: always
+      volumes:  # 照過來喔, 新增的段落在這邊
+        - /etc/localtime:/etc/localtime:ro
+      environment:
+        WORDPRESS_DB_HOST: demo-sql
+        WORDPRESS_DB_USER: demo-wp
+        WORDPRESS_DB_PASSWORD: password
+        WORDPRESS_DB_NAME: demo-wp
+        WORDPRESS_DB_CHARSET: utf8mb4
+        WORDPRESS_CONFIG_EXTRA: |
+          define('WP_HOME','http://127.0.0.1:8001');
+          define('WP_SITEURL','http://127.0.0.1:8001');
+
+    demo-sql:
+      image: percona:ps-5.7
+      hostname: demo-sql
+      container_name: demo-sql
+      restart: always
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+      environment:
+         MYSQL_ROOT_PASSWORD: password
+ 
