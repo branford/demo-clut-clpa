@@ -12,6 +12,7 @@ services:
       restart: always
       volumes:  # 照過來喔, 新增的段落在這邊
         - /etc/localtime:/etc/localtime:ro
+        - ./wp-content:/var/www/html/wp-content
       environment:
         WORDPRESS_DB_HOST: demo-sql
         WORDPRESS_DB_USER: demo-wp
