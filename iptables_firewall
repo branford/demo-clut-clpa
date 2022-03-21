@@ -1,0 +1,41 @@
+#!/bin/bash
+###-----------------------------------------------------###
+###  Flash IP tables
+###-----------------------------------------------------###
+/sbin/iptables -F
+/sbin/iptables -X
+/sbin/iptables -t nat -F
+/sbin/iptables -t nat -X
+
+###-----------------------------------------------------###
+###  Set Basic Policy
+###-----------------------------------------------------###
+/sbin/iptables -P INPUT         DROP
+
+/sbin/iptables -P FORWARD       DROP
+/sbin/iptables -P OUTPUT        ACCEPT
+
+/sbin/iptables -A INPUT -i lo -j ACCEPT
+/sbin/iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# 自名單
+/sbin/iptables -A INPUT -s 192.168.0.0/16 -j ACCEPT
+/sbin/iptables -A INPUT -s 1.2.3.4/32 -j ACCEPT
+
+###-----------------------------------------------------###
+### Rules for Daemons
+###-----------------------------------------------------###
+# SSH
+/sbin/iptables -A INPUT -p tcp --dport 22 -j DROP
+
+# HTTP
+/sbin/iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# ICMP
+/sbin/iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/s --limit-burst 5 -j ACCEPT
+/sbin/iptables -A INPUT -p icmp --icmp-type echo-request -j DROP
+
+###-----------------------------------------------------###
+### Rules for Specific Servers
+###-----------------------------------------------------###
